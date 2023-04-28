@@ -132,8 +132,10 @@ void ModuleSelect() {
 };
 
 //Member Module Part
+
 int memberfunctionSelect() {
     int choice;
+    system("cls");
 do{
     readFile();
     printf("Member Module Menu\n");
@@ -224,7 +226,11 @@ int memRegister() {
                     continue;
                 }
             }  
-            
+
+            if (strcmp(memList[count].memberId, newMem.memberId) == 0) {
+                printf("Sorry,this Member ID already registered.~_~\n\n");
+                continue;
+            }
                 idValid = 1;
             
         }
@@ -503,7 +509,7 @@ void memberList() {
     printf("No.\tID\tName\t\t\t      Gender\t No.IC\t\t   No.Contact\t    Up Line\n");
     printf("===================================================================================================\n");
     for (count = 0; count < i; count++) {
-        printf("%d.      %-6s\t%-30s\t%1s\t%15s\t%15s\t%10s\n", num, memList[count].memberId, memList[count].name, memList[count].gender, memList[count].ic, memList[count].contactNum, memList[count].upLine);
+        printf("%-2d.      %-6s\t%-30s\t%1s\t%15s\t%15s\t%10s\n", num, memList[count].memberId, memList[count].name, memList[count].gender, memList[count].ic, memList[count].contactNum, memList[count].upLine);
         num++;
     }
 
@@ -524,6 +530,8 @@ void memHistory() {
         exit(-1);
     }
 
+    printf("Activity History\n");
+    printf("========================\n");
     while (!feof(history))
     {
         fscanf(history, "%[^\n]\n", &activity);
@@ -632,8 +640,8 @@ void ModifyModule() {
     puts("Enter Sales Order id > eg.S001");
     scanf("%s", UserInputSalesOrderID);
 
-    while (fscanf(filePTR, "%[^\n]-%[^\n]-%d-%lf-%[^\n]", SalesDetail.SalesOrderID, SalesDetail.ItemCode, &SalesDetail.QuantityOrdered, &SalesDetail.Price, SalesDetail.MemberID) != EOF) {
-        if (strcmp(SalesDetail.SalesOrderID, UserInputSalesOrderID) == 0) {
+    while (fread(&SalesDetail, sizeof(SalesOrder), 1, filePTR) != EOF) {
+       if (strcmp(SalesDetail.SalesOrderID, UserInputSalesOrderID) == 0) {
             puts("Sales Module Found");
             printf("\n\nSales Order ID > %s\nItem Code > %s\nQuantity Ordered > %d\nPrice > %.2lf\nMember ID > %s\n"
                 , SalesDetail.SalesOrderID, SalesDetail.ItemCode, SalesDetail.QuantityOrdered, SalesDetail.Price, SalesDetail.MemberID);
@@ -707,11 +715,19 @@ void SearchModule() {
     puts("Enter Sales Order id > eg.S001");
     scanf(" %s", UserInputSalesOrderID);
 
-    while (fscanf(filePTR, "%[^\n]-%[^\n]-%d-%lf-%[^\n]", SalesDetail.SalesOrderID, SalesDetail.ItemCode, &SalesDetail.QuantityOrdered, &SalesDetail.Price, SalesDetail.MemberID) != EOF) {
+    while (fread(&SalesDetail, sizeof(SalesOrder), 1, filePTR) != 0) {
         if (strcmp(SalesDetail.SalesOrderID, UserInputSalesOrderID) == 0) {
             puts("Sales Module Found");
-            fprintf(filePTR, "\n\nSales Order ID > %s\nItem Code > %s\nQuantity Ordered > %d\nPrice > %.2lf\nMember ID > %s\n"
-                , SalesDetail.SalesOrderID, SalesDetail.ItemCode, SalesDetail.QuantityOrdered, SalesDetail.Price, SalesDetail.MemberID);
+            
+               /* fread(&SalesDetail.SalesOrderID, sizeof(char), 5, filePTR);
+                fread(&SalesDetail.ItemCode, sizeof(char), 7, filePTR);
+                fread(&SalesDetail.QuantityOrdered, sizeof(int), 1, filePTR);
+                fread(&SalesDetail.Price, sizeof(double), 1, filePTR);
+                fread(&SalesDetail.MemberID, sizeof(char), 10, filePTR);
+            */
+                printf("\n\nSales Order ID > %s\nItem Code > %s\nQuantity Ordered > %d\nPrice > %.2lf\nMember ID > %s\n"
+                    , SalesDetail.SalesOrderID, SalesDetail.ItemCode, SalesDetail.QuantityOrdered, SalesDetail.Price, SalesDetail.MemberID);
+            
             IDfound = 1;
         }
     }
@@ -755,24 +771,24 @@ void ReportModule(int* CozyReport) {
         fclose(filePTR);
     };
 
-    while (fread(&SalesDetail, sizeof(SalesDetail), 1, filePTR) != 0) {
-        fwrite(&SalesDetail.SalesOrderID, sizeof(char), 5, filePTR);
-        fwrite(&SalesDetail.ItemCode, sizeof(char), 7, filePTR);
-        fwrite(&SalesDetail.QuantityOrdered, sizeof(int), 1, filePTR);
-        fwrite(&SalesDetail.Price, sizeof(double), 1, filePTR);
-        fwrite(&SalesDetail.MemberID, sizeof(char), 10, filePTR);
+    while (!feof(filePTR)) {
+        fread(&SalesDetail.SalesOrderID, sizeof(char), 5, filePTR);
+        fread(&SalesDetail.ItemCode, sizeof(char), 7, filePTR);
+        fread(&SalesDetail.QuantityOrdered, sizeof(int), 1, filePTR);
+        fread(&SalesDetail.Price, sizeof(double), 1, filePTR);
+        fread(&SalesDetail.MemberID, sizeof(char), 10, filePTR);
+
+
+        puts("------------------------------------------------------------");
+        puts("||\tAnchor Company Cozy Sales Report\t\t ||");
+        puts("------------------------------------------------------------");
+        printf("|| \tSales Order ID \t\t>> \t%s\t\t ||\n", SalesDetail.SalesOrderID);
+        printf("|| \tSales Item Code \t\t>> \t%s\t ||\n", SalesDetail.ItemCode);
+        printf("|| \tQuantity Ordered \t\t>> \t%d\t ||\n", SalesDetail.QuantityOrdered);
+        printf("|| \tSales Item Price \t\t>> \t%.2lf\t ||\n", SalesDetail.Price);
+        printf("|| \tMember ID \t\t>> \t%s\t\t ||\n", SalesDetail.MemberID);
+        puts("------------------------------------------------------------");
     }
-
-    puts("------------------------------------------------------------");
-    puts("||\tAnchor Company Cozy Sales Report\t\t ||");
-    puts("------------------------------------------------------------");
-    printf("|| \tSales Order ID \t\t>> \t%s\t\t ||\n", SalesDetail.SalesOrderID);
-    printf("|| \tSales Item Code \t\t>> \t%s\t ||\n", SalesDetail.ItemCode);
-    printf("|| \tQuantity Ordered \t\t>> \t%d\t ||\n", SalesDetail.QuantityOrdered);
-    printf("|| \tSales Item Price \t\t>> \t%.2lf\t ||\n", SalesDetail.Price);
-    printf("|| \tMember ID \t\t>> \t%s\t\t ||\n", SalesDetail.MemberID);
-    puts("------------------------------------------------------------");
-
     fclose(filePTR);
 }
 
@@ -785,7 +801,7 @@ void WriteToFile() {
     double TotalPrice;
     char confirmation;
 
-    FILE* filePTR = fopen("SalesModuleFile.bin", "wb+");
+    FILE* filePTR = fopen("SalesModuleFile.bin", "ab+");
 
     if (filePTR == NULL) {
         printf("Error!");
@@ -831,11 +847,11 @@ void ReadFromFile() {
     };
 
     while (fread(&SalesDetail, sizeof(SalesDetail), 1, filePTR) != 0) {
-        fwrite(&SalesDetail.SalesOrderID, sizeof(char), 5, filePTR);
-        fwrite(&SalesDetail.ItemCode, sizeof(char), 7, filePTR);
-        fwrite(&SalesDetail.QuantityOrdered, sizeof(int), 1, filePTR);
-        fwrite(&SalesDetail.Price, sizeof(double), 1, filePTR);
-        fwrite(&SalesDetail.MemberID, sizeof(char), 10, filePTR);
+        fread(&SalesDetail.SalesOrderID, sizeof(char), 5, filePTR);
+        fread(&SalesDetail.ItemCode, sizeof(char), 7, filePTR);
+        fread(&SalesDetail.QuantityOrdered, sizeof(int), 1, filePTR);
+        fread(&SalesDetail.Price, sizeof(double), 1, filePTR);
+        fread(&SalesDetail.MemberID, sizeof(char), 10, filePTR);
     }
 
     printf("\n\nSales Order ID > %s\nItem Code > %s\nQuantity Ordered > %d\nPrice > %.2lf\nMember ID > %s\n"
@@ -926,7 +942,7 @@ void StaffLoginModule() {
     char UserInputStaffID[10];
     char UserInputPassphrase[20];
     int Loginsuccess = 0;
-    FILE* filePTR = fopen("StaffModuleFile.txt", "r");
+    FILE* filePTR = fopen("StaffModuleFile.txt", "a");
     puts("Please Enter your Credentials!\n");
     puts("Please Enter Your Staff ID > eg.STF001");
     scanf(" %s", UserInputStaffID);
@@ -939,8 +955,6 @@ void StaffLoginModule() {
     else {
         Loginsuccess = 0;
         puts("Login Fail");
-        fprintf(filePTR, "%s %s", StaffDetail.StaffID, StaffDetail.StaffPassPhrase);
-        printf("user input %s %s", UserInputStaffID, UserInputPassphrase);
         StaffModuleOptionSelect();
     }
 
@@ -1100,7 +1114,7 @@ void StaffDisplayModule() {
 void StaffReportModule(int* CozyReport) {
     puts("Printing cozy report");
 
-    FILE* filePTR = fopen("StaffModuleFile.txt", "r");
+    FILE* filePTR = fopen("StaffModuleFile.txt", "a");
     StaffInfo StaffDetail;
     int counter;
 
@@ -1132,7 +1146,7 @@ void StaffReportModule(int* CozyReport) {
 void StaffReadFromFile() {
     puts("\nAccessing Read Module... \n");
 
-    FILE* filePTR = fopen("StaffModuleFile.txt", "r");
+    FILE* filePTR = fopen("StaffModuleFile.txt", "a");
     StaffInfo StaffDetail;
     int counter;
 
